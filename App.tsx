@@ -41,6 +41,18 @@ const App = () => {
     }).start();
   };
 
+  const ListHeader = () => (
+    <View style={styles.headerFooter}>
+      <Text style={styles.headerFooterText}>This is the Header</Text>
+    </View>
+  );
+
+  const ListFooter = () => (
+    <View style={styles.headerFooter}>
+      <Text style={styles.headerFooterText}>This is the Footer</Text>
+    </View>
+  );
+
   const renderItem = ({item}) => (
     <View style={styles.item}>
       <Text style={styles.title}>{item.title}</Text>
@@ -84,6 +96,8 @@ const App = () => {
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id}
+          ListHeaderComponent={ListHeader}
+          ListFooterComponent={ListFooter}
         />
       )}
     </SafeAreaView>
@@ -104,6 +118,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+  },
+  headerFooter: {
+    padding: 20,
+    backgroundColor: '#6a51ae',
+  },
+  headerFooterText: {
+    fontSize: 24,
+    color: '#fff',
   },
 });
 
