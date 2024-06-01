@@ -1,117 +1,109 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Animated,
 } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const translateY = new Animated.Value(0);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const [condi, setCondi] = useState(true)
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  useEffect(() => {
+    // Simulate a network request
+    setTimeout(() => {
+      setData([
+        {id: '1', title: 'Item 1'},
+        {id: '2', title: 'Item 2'},
+        {id: '3', title: 'Item 3'},
+        {id: '4', title: 'Item 4'},
+        {id: '5', title: 'Item 5'},
+      ]);
+      setIsLoading(false);
+    }, 3000); // Simulate a 3-second loading time
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+    // Start translateY animation after a short delay
+    setTimeout(startAnimation, 500);
+  }, []);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const startAnimation = () => {
+    Animated.timing(translateY, {
+      toValue: 10,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
   };
 
+  const renderItem = ({item}) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{item.title}</Text>
+    </View>
+  );
+
+  const renderSkeleton = () => (
+    <Animated.View
+      style={{
+        transform: [{translateY: condi ? interpolatedTranslateYOpp : interpolatedTranslateY}],
+        backgroundColor: 'red',
+      }}>
+      {Array.from({length: 5}).map((_, index) => (
+        <SkeletonPlaceholder.Item
+          key={index}
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="center"
+          marginTop={index === 0 ? 0 : 8}>
+          <SkeletonPlaceholder.Item width="80%" height={24} borderRadius={4} />
+        </SkeletonPlaceholder.Item>
+      ))}
+    </Animated.View>
+  );
+
+  const interpolatedTranslateY = translateY.interpolate({
+    inputRange: [5, 10],
+    outputRange: [700, 0], // Adjust the final position as needed
+  });
+  const interpolatedTranslateYOpp = translateY.interpolate({
+    inputRange: [5, 10],
+    outputRange: [0, 700], // Adjust the final position as needed
+  });
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView style={styles.container}>
+      {isLoading ? (
+        renderSkeleton()
+      ) : (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />
+      )}
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    marginTop: 20,
   },
-  sectionTitle: {
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: 5,
+  },
+  title: {
     fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
   },
 });
 
